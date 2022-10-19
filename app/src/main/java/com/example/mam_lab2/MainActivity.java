@@ -13,23 +13,26 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     MediaPlayer mediaPlayer;
     Button playButton;
     Button stopButton;
-    boolean externalStorage = false;
+    Button choiceButton;
+    Uri selectedFileURI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.song);
-        mediaPlayer.setVolume(50,50);
-
         playButton = (Button) findViewById(R.id.playButton);
         stopButton = (Button) findViewById(R.id.stopButton);
+        playButton.setEnabled(false);
+        stopButton.setEnabled(false);
+        choiceButton = (Button) findViewById(R.id.choiceButton);
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,6 +48,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        choiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectFile();
+            }
+        });
+
     }
 
     @Override
@@ -56,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean checkStoragePermission(){
-        if(Environment.isExternalStorageManager())
-            Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
         return Environment.isExternalStorageManager();
     }
 
@@ -67,13 +75,42 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 999);
     }
 
+    private void selectFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("audio/*");
+        startActivityForResult(intent, 100);
+    }
+
+    public void createMediaPlayer(){
+        mediaPlayer = MediaPlayer.create(this, selectedFileURI);
+        mediaPlayer.setVolume(50,50);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData)
     {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (resultCode == RESULT_OK && requestCode == 999)
         {
-            checkStoragePermission();
+            if(checkStoragePermission())
+                Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+            else{
+                Toast.makeText(getApplicationContext(), "No storage access", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (resultCode == RESULT_OK && requestCode == 100 && resultData != null && resultData.getData() != null){
+            playButton.setEnabled(true);
+            stopButton.setEnabled(true);
+            if(selectedFileURI == null) {
+                selectedFileURI = resultData.getData();
+                createMediaPlayer();
+            }
+            else{
+                selectedFileURI = resultData.getData();
+                mediaPlayer.reset();
+                createMediaPlayer();
+            }
         }
     }
 
@@ -95,6 +132,6 @@ public class MainActivity extends AppCompatActivity {
     public void stopMusic(){
             mediaPlayer.stop();
             playButton.setText(getString(R.string.playButton_text));
-            mediaPlayer = MediaPlayer.create(this, R.raw.song);
+            createMediaPlayer();
     }
 }

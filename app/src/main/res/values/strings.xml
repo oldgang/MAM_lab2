@@ -3,4 +3,5 @@
     <string name="playButton_text">Play</string>
     <string name="pauseButton_text">Pause</string>
     <string name="stopButton_text">Stop</string>
+    <string name="choiceButton_text">Choose File</string>
 </resources>
