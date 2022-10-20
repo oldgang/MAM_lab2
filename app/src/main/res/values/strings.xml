@@ -4,4 +4,6 @@
     <string name="pauseButton_text">Pause</string>
     <string name="stopButton_text">Stop</string>
     <string name="choiceButton_text">Choose File</string>
+    <string name="startRecordingButton_text">Start Recording</string>
+    <string name="stopRecordingButton_text">Stop Recording</string>
 </resources>
